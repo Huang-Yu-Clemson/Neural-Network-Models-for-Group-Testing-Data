@@ -18,9 +18,11 @@ This repository provides a novel framework using neural networks combined with a
 
 ## Repository Structure
 ```text
-├── data/                   # Sample datasets and data generation scripts
-├── models/                 # Neural network architectures (e.g., Softmax NN)
-├── utils/                  # Helper functions for EM algorithm and data augmentation
-├── main.py                 # Main script to train and evaluate the model
-├── requirements.txt        # List of dependencies
-└── README.md
+├── src/                 
+│   ├── loglik.cpp
+│   ├── nn.cpp
+│   └── SampLatent.cpp
+├── R/                    
+│   └── utils.R          
+├── main.R                
+└── run_simulation.sh     
