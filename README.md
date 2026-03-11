@@ -6,7 +6,7 @@
 
 This repository contains the official PyTorch implementation of the paper **"Neural Network Models for Group Testing Data"**.
 
-## 📌 Overview
+## Overview
 Group testing is a cost-effective strategy for infectious disease screening. However, modeling multiplex group testing data is challenging due to the latent individual statuses and potential class imbalance. 
 
 This repository provides a novel framework using neural networks combined with an **Expectation-Maximization (EM) algorithm** and **data augmentation** strategies to efficiently train models directly on group-level testing data. 
@@ -16,7 +16,7 @@ This repository provides a novel framework using neural networks combined with a
 - **EM Framework:** Robust data augmentation and EM-based training strategies.
 - **Imbalance Handling:** Built-in re-weighting mechanisms to handle low prevalence rates.
 
-## 📂 Repository Structure
+## Repository Structure
 ```text
 ├── data/                   # Sample datasets and data generation scripts
 ├── models/                 # Neural network architectures (e.g., Softmax NN)
