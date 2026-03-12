@@ -3,9 +3,7 @@ library(Rcpp)
 library(RcppArmadillo)
 
 
-sourceCpp("src/loglik.cpp")
-sourceCpp("src/nn.cpp")
-sourceCpp("src/SampLatent.cpp")
+sourceCpp("GroupTesting.cpp")
 
 
 Dorfman.decode.diff.error <- function(Y.true, Se, Sp, c) {
@@ -50,50 +48,53 @@ Dorfman.decode.diff.error <- function(Y.true, Se, Sp, c) {
 
 generate_group_data <- function(N, c, se, sp, data_model, algorithm) {
   
-
-  X1 <- runif(N, -pi/2, pi/2)
-  X2 <- rbinom(N, size = 1, prob = 0.5)
-  X3 <- rbinom(N, size = 1, prob = 0.5)
-  X4 <- rbinom(N, size = 1, prob = 0.5)
-  
-  if (algorithm %in% c("L1", "NN")){
-    X  <- cbind(X1, X2, X3, X4)
-  } else if (algorithm == "L2"){
-    X <- matrix(cbind(
-      X1, X2, X3, X4, 
-      X1 * X2, 
-      X1 * X3, 
-      X1 * X4, 
-      X2 * X3, 
-      X2 * X4, 
-      X3 * X4,
-      X1 * X2 * X3, 
-      X1 * X2 * X4, 
-      X1 * X3 * X4, 
-      X2 * X3 * X4,
-      X1 * X2 * X3 * X4
-    ), ncol = 15)
-  }
-
-  if (data_model == "M1") {
-    p_t1 <- -5 + X1 + 0.5*X2 + 1.5*X3 + 2*X4
-  } else if (data_model == "M2") {
-    p_t1 <- -4.5 + 3 * X1 * (-1.5 + 0.5 * X2 + 1 * X3 + 2 * X4)
-  } else if (data_model == "M3") {
-    p_t1 <- -4 + 3 * sin(2*X1) * (-1.5 + 0.5 * X2 + 1 * X3 + 2 * X4)
+  if (data_model %in% c("M1", "M2", "M3")) {
+    X1 <- runif(N, -pi/2, pi/2)
+    X2 <- rbinom(N, size = 1, prob = 0.5)
+    X3 <- rbinom(N, size = 1, prob = 0.5)
+    X4 <- rbinom(N, size = 1, prob = 0.5)
+    
+    if (algorithm %in% c("L1", "NN", "CEL", "WCEL")){
+      X  <- cbind(X1, X2, X3, X4)
+    } else if (algorithm == "L2"){
+      X <- matrix(cbind(X1, X2, X3, X4, X1*X2, X1*X3, X1*X4, X2*X3, X2*X4, X3*X4, X1*X2*X3, X1*X2*X4, X1*X3*X4, X2*X3*X4, X1*X2*X3*X4), ncol = 15)
+    }
+    
+    if (data_model == "M1") {
+      p_t1 <- -5 + X1 + 0.5*X2 + 1.5*X3 + 2*X4
+    } else if (data_model == "M2") {
+      p_t1 <- -4.5 + 3 * X1 * (-1.5 + 0.5 * X2 + 1 * X3 + 2 * X4)
+    } else if (data_model == "M3") {
+      p_t1 <- -4 + 3 * sin(2*X1) * (-1.5 + 0.5 * X2 + 1 * X3 + 2 * X4)
+    } 
+  } else if (data_model %in% c("B","IM1","IM2")){ #Numerical studies for imbalance part
+    if(data_model == "B"){
+      rate = 0.2
+    }else if(data_model == "IM1"){
+      rate = 0.02
+    }else if(data_model == "IM2"){
+      rate = 0.002
+    }
+    n1 <- round(rate * N)# We want exactly rate below 20.
+    n2 <- N - n1
+    
+    X1 <- runif(n1, min = 0,  max = 20)
+    X2 <- runif(n2, min = 20, max = 100)
+    X <- round(c(X1, X2))  # numeric vector of length N
+    X <- X[sample(length(X))]
+    X <- matrix(X, ncol = 1)  # now a matrix with one column
+    p_t1 <- -4 + 3 * sin(X*pi/100+pi/4)
   } else {
-    stop("Unknown data_model! Please specify 'M1', 'M2', or 'M3'.")
+    stop("Unknown data_model!")
   }
   
-  
+  #Other codes are the same
   Real_p <- exp(p_t1) / (1 + exp(p_t1))            
   Y_true <- rbinom(N, size = 1, prob = Real_p)
-  
   
   group_data <- Dorfman.decode.diff.error(Y_true, se, sp, c)
   Z <- group_data$Z    
   Y <- group_data$Y    
-  
   
   K <- N / c
   if (K != floor(K)) stop("N must be a multiple of c")
