@@ -28,7 +28,7 @@ Neural-Network-Models-for-Group-Testing-Data/
 ├── utils.R               # Utility functions (Dorfman decoding, data generation, etc.)
 ├── main.R                # Main entry script for the EM algorithm and model training
 └── run_simulation.sh     # SLURM submission script for HPC Array Jobs
-
+```text
 ## Simulation Scenarios
 The `main.R` script is designed to be highly modular, supporting various underlying data generation mechanisms and fitting algorithms:
 
