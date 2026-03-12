@@ -1,28 +1,30 @@
 # Neural Network Models for Group Testing Data
 
 [![Award](https://img.shields.io/badge/Award-ENAR_2026_Distinguished_Student_Paper-gold.svg)]()
-[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)]()
+[![R: 4.4.0+](https://img.shields.io/badge/R-4.4.0+-blue.svg)]()
+[![C++: GCC 12.3.0+](https://img.shields.io/badge/C++-GCC_12.3.0+-blue.svg)]()
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)]()
 
-This repository contains the official PyTorch implementation of the paper **"Neural Network Models for Group Testing Data"**.
+This repository contains the official implementation of the paper **"Neural Network Models for Group Testing Data"**.
 
 ## Overview
-Group testing is a cost-effective strategy for infectious disease screening. However, modeling multiplex group testing data is challenging due to the latent individual statuses and potential class imbalance. 
+Group testing is a highly cost-effective strategy for infectious disease screening. However, modeling multiplex group testing data is mathematically challenging due to the latent nature of individual statuses, the complexity of pooled testing decoding (e.g., Dorfman algorithms), and potential class imbalance in low-prevalence settings.
 
-This repository provides a novel framework using neural networks combined with an **Expectation-Maximization (EM) algorithm** and **data augmentation** strategies to efficiently train models directly on group-level testing data. 
+This repository provides a novel, high-performance computational framework using **Neural Networks combined with an Expectation-Maximization (EM) algorithm**. To maximize computational efficiency, the neural network architecture, forward/backward propagation, and log-likelihood optimizations are implemented entirely from scratch in **C++** via `Rcpp` and `RcppArmadillo`, seamlessly integrated into an R-based EM framework.
 
 ### Key Features:
-- **Latent Status Modeling:** Neural network architectures designed to approximate the joint probabilities of multiplex individual statuses.
-- **EM Framework:** Robust data augmentation and EM-based training strategies.
-- **Imbalance Handling:** Built-in re-weighting mechanisms to handle low prevalence rates.
+- **Latent Status Modeling:** Neural network architectures designed to approximate the individual infection probabilities directly from pooled, group-level testing data.
+- **Monte Carlo EM Framework:** Robust latent variable sampling (`SampLatent`) and EM-based training strategies to handle unobserved true individual statuses.
+- **High-Performance Computing:** Core bottleneck computations (e.g., log-likelihood estimation, NN gradient updates) are written in optimized C++ to handle large-scale simulation studies.
+- **Imbalance Handling (Upcoming):** Built-in re-sampling and weighting mechanisms tailored for highly imbalanced datasets with low disease prevalence.
 
 ## Repository Structure
 ```text
-├── src/                 
-│   ├── loglik.cpp
-│   ├── nn.cpp
-│   └── SampLatent.cpp
-├── R/                    
-│   └── utils.R          
-├── main.R                
-└── run_simulation.sh     
+Neural-Network-Models-for-Group-Testing-Data/
+├── src/                  # Core C++ modules for speed acceleration
+│   ├── loglik.cpp        # Log-likelihood computation for pooled data
+│   ├── nn.cpp            # Custom Neural Network implementation (RcppArmadillo)
+│   └── SampLatent.cpp    # Latent variable sampling for the E-step
+├── utils.R               # Utility functions (Dorfman decoding, data generation, etc.)
+├── main.R                # Main entry script for the EM algorithm and model training
+└── run_simulation.sh     # SLURM submission script for HPC Array Jobs
