@@ -20,7 +20,6 @@ double loglik_cpp_in(NumericMatrix C,
     std::vector<int> ind(group_size);
     for (int i = 0; i < group_size; ++i) ind[i] = C(k0, i+1) - 1;
     
-    // ptemp
     std::vector<double> ptemp(group_size);
     for(int i = 0; i < group_size; ++i) ptemp[i] = p[ind[i]];
     
@@ -28,7 +27,6 @@ double loglik_cpp_in(NumericMatrix C,
     int num_comb = 1 << cj;
     
     std::vector<double> prod_pi(num_comb, 1.0), SeSp(num_comb, 1.0);
-    // prod_pi
     for(int i = 0; i < num_comb; ++i) {
       double pr = 1.0;
       for(int j = 0; j < cj; ++j)
@@ -36,7 +34,6 @@ double loglik_cpp_in(NumericMatrix C,
       prod_pi[i] = pr;
     }
     
-    // SeSp
     int Bk = B(k0,0);
     for(int t = 0; t < Bk; ++t) {
       int test_idx = B(k0,t+1) -1;
@@ -46,7 +43,6 @@ double loglik_cpp_in(NumericMatrix C,
       std::vector<int> Yid(Yid_size);
       for(int i=0;i<Yid_size;i++) Yid[i] = Z(test_idx, i+3)-1;
       
-      // check the ind of Yid 
       std::vector<int> id(Yid_size);
       for(int i=0;i<Yid_size;i++)
         id[i] = std::distance(ind.begin(), 
@@ -75,7 +71,6 @@ double loglik_cpp_in(NumericMatrix C,
   for(double v : prob_Z) if(!NumericVector::is_na(v)) out += std::log(v);
   return out;
 }
-// initialize_parameters translated from R to C++
 static void initialize_parameters_cpp(
     int input_size,
     const IntegerVector& nodes,
@@ -85,27 +80,23 @@ static void initialize_parameters_cpp(
   Ws = arma::field<arma::mat>(layers);
   Bs = arma::field<arma::rowvec>(layers);
   
-  // first layer: normal(sd = sqrt(1 / nodes[0]))
   Ws(0) = arma::randn(input_size, nodes[0]) * std::sqrt(1.0 / nodes[0]);
   Bs(0) = arma::rowvec(nodes[0], arma::fill::zeros);
   
-  // subsequent layers: normal(sd = sqrt(2 / nodes[i]))
   for (int i = 1; i < layers; ++i) {
     Ws(i) = arma::randn(nodes[i-1], nodes[i]) * std::sqrt(2.0 / nodes[i-1]);
     Bs(i) = arma::rowvec(nodes[i], arma::fill::zeros);
   }
 }
 
-// helper: flatten arma::mat → NumericVector (column‑major)
 static NumericVector mat_to_NumericVector(const arma::mat& M) {
   NumericVector v( M.n_elem );
   std::copy( M.begin(), M.end(), v.begin() );
-  if (M.n_cols > 1)        // if you need a matrix dim
+  if (M.n_cols > 1)    
     v.attr("dim") = Dimension( M.n_rows, M.n_cols );
   return v;
 }
 
-// [[Rcpp::export]]
 List train_neural_network_loglik(
     NumericMatrix X_train,
     NumericVector Y_t,
@@ -121,20 +112,17 @@ List train_neural_network_loglik(
     double learning_rate,
     int epochs,
     List initial_model) {
-  // 
   arma::mat Xtr  = as<arma::mat>(X_train);
   arma::vec Ytr = as<arma::vec>(Y_t);
   arma::mat Xval  = as<arma::mat>(X_val);
   IntegerVector k_val = seq_len(B_val.nrow());
   
-  // 
   std::vector<int> act_code(layers);
   for (int i = 0; i < layers; ++i) {
     std::string s = as<std::string>(activations[i]);
     act_code[i] = (s == "sigmoid" ? 0 : (s == "relu" ? 1 : -1));
   }
   
-  // initialization
   arma::field<arma::mat> Ws(layers), inputs(layers+1), etas(layers), deltas(layers), best_Ws(layers);
   arma::field<arma::rowvec> Bs(layers), best_Bs(layers);
   arma::mat ZL, deriv, S, back, A_val, A_train, Zmat_val, Zmat_train, grad;
@@ -154,7 +142,6 @@ List train_neural_network_loglik(
   best_Ws = Ws;
   best_Bs = Bs;
   
-  // --- lv ---
   A_val = Xval;
   for (int i = 0; i < layers; ++i) {
     Zmat_val = A_val*Ws(i);
@@ -167,8 +154,7 @@ List train_neural_network_loglik(
   p = mat_to_NumericVector(p_vec);  
   curr_lv = loglik_cpp_in(C_val, B_val, Z_val, p, se, sp, k_val);
   double best_lv = curr_lv;
-  
-  // for loop
+
   for (int epoch = 1; epoch <= epochs; ++epoch) {
     // --- feedforward ---
     A_train = Xtr;

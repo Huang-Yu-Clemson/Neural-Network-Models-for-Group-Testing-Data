@@ -28,8 +28,8 @@ if (algorithm %in% c("L1", "L2")) {
   Ntr <- 20000
   Nva <- 5000
   
-  train <- generate_group_data(Ntr, c, se, sp, data_model)
-  val   <- generate_group_data(Nva, c, se, sp, data_model)
+  train <- generate_group_data(Ntr, c, se, sp, data_model, algorithm)
+  val   <- generate_group_data(Nva, c, se, sp, data_model, algorithm)
   
   X  <- train$X
   Y  <- train$Y
@@ -159,7 +159,7 @@ Real_p <- as.matrix(Real_p)
 
 
 if (algorithm %in% c("L1", "L2")) {
-  predY <- exp(X_new %*% best_theta + best_b) / (1 + exp(X_test %*% best_theta + best_b))
+  predY <- exp(X_new %*% best_theta + best_b) / (1 + exp(X_new %*% best_theta + best_b))
 } else if (algorithm == "NN") {
   predY <- forward_propagation(input_data = X_test, model = initial_model)$output
 }
