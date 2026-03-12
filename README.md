@@ -28,24 +28,3 @@ Neural-Network-Models-for-Group-Testing-Data/
 ├── utils.R               # Utility functions (Dorfman decoding, data generation, etc.)
 ├── main.R                # Main entry script for the EM algorithm and model training
 └── run_simulation.sh     # SLURM submission script for HPC Array Jobs
-```text
-## Simulation Scenarios
-The `main.R` script is designed to be highly modular, supporting various underlying data generation mechanisms and fitting algorithms:
-
-**Data Models (`data_model`):**
-* `M1`: Linear additive model (main effects only).
-* `M2`: Model with high-order interaction terms.
-* `M3`: Highly non-linear model featuring sine functions and interactions.
-
-**Algorithms (`algorithm`):**
-* `L1`: Standard Logistic Regression (4 main features).
-* `L2`: Full-interaction Logistic Regression (15 features including two-way to four-way interactions).
-* `NN`: Multi-layer Feedforward Neural Network (Current setup: 4 layers, `[50, 50, 50, 1]` nodes, ReLU & Sigmoid activations).
-
-## Usage
-Ensure you have **R (>= 4.4.0)** and a **C++ Compiler** (e.g., GCC >= 12.3.0) installed. The required R packages include `Rcpp` and `RcppArmadillo`. Note that `src/*.cpp` files will be automatically compiled via `sourceCpp()` during the first run.
-
-### Running Locally
-You can run a single task via the command line by specifying the data model, algorithm, and task ID:
-```bash
-Rscript main.R M2 NN 1
